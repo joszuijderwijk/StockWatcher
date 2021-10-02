@@ -31,7 +31,7 @@ bool gain = true;
 
 void setup() {
     WiFiManager wifiManager;
-    WiFiManagerParameter custom_text("<p>(c) 2021 by <a href=\"maito:hoi@joszuijderwijk.nl\">Jos Zuijderwijk</a></p>");
+    WiFiManagerParameter custom_text("<p>(c) 2021 by <a href=\"mailto:hoi@joszuijderwijk.nl\">Jos Zuijderwijk</a></p>");
     wifiManager.addParameter(&custom_text);
 
     if (wifiManager.autoConnect("StockWatcher", "")){
