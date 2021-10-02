@@ -1,0 +1,330 @@
+[
+    {
+        "id": "674ace61965dd6f3",
+        "type": "tab",
+        "label": "StockWatcher",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a3965a6d1f028337",
+        "type": "mqtt out",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "topic": "stockwatcher/input",
+        "qos": "",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "91478dbd.3a542",
+        "x": 1050,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "51461b585fb7f860",
+        "type": "inject",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "*/5 9-17 * * 1,2,3,4,5",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"VWCE-DE\":118,\"EUNL-DE\":135,\"2B76-DE\":200}",
+        "payloadType": "json",
+        "x": 250,
+        "y": 180,
+        "wires": [
+            [
+                "4e27710d586f6e32"
+            ]
+        ]
+    },
+    {
+        "id": "7079c3cc9310472a",
+        "type": "inject",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "00 00 * * 2,3,4,5,6",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "0",
+        "payloadType": "str",
+        "x": 870,
+        "y": 340,
+        "wires": [
+            [
+                "a3965a6d1f028337"
+            ]
+        ]
+    },
+    {
+        "id": "a93c79c6d3463997",
+        "type": "http request",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 690,
+        "y": 180,
+        "wires": [
+            [
+                "ecab29e24342226f",
+                "dcb15801c4ba12bd"
+            ]
+        ]
+    },
+    {
+        "id": "53c198a183756082",
+        "type": "function",
+        "z": "674ace61965dd6f3",
+        "name": "Get values",
+        "func": "\nvar re = /-?\\d+.\\d+/\nchange = msg.change[1].match(re)[0];  // eg -1.0 %\n\ncurrentValue = parseFloat(msg.price) * msg.shares;\nprevValue = msg.price * (1 - parseFloat(change) / 100) * msg.shares;\n\n\nmsg.payload = { \"currentValue\": currentValue,\n                \"prevValue\": prevValue};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 300,
+        "wires": [
+            [
+                "7343537e9419cb97"
+            ]
+        ]
+    },
+    {
+        "id": "4e27710d586f6e32",
+        "type": "split",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "stock",
+        "x": 370,
+        "y": 180,
+        "wires": [
+            [
+                "c3b86f27573d40b6"
+            ]
+        ]
+    },
+    {
+        "id": "c3b86f27573d40b6",
+        "type": "change",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "url",
+                "pt": "msg",
+                "to": "\"https://www.cnbc.com/quotes/\" & msg.stock",
+                "tot": "jsonata"
+            },
+            {
+                "t": "set",
+                "p": "shares",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 520,
+        "y": 180,
+        "wires": [
+            [
+                "a93c79c6d3463997"
+            ]
+        ]
+    },
+    {
+        "id": "7343537e9419cb97",
+        "type": "join",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "mode": "auto",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": true,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 650,
+        "y": 300,
+        "wires": [
+            [
+                "f69243b4ecf15c8d"
+            ]
+        ]
+    },
+    {
+        "id": "f69243b4ecf15c8d",
+        "type": "function",
+        "z": "674ace61965dd6f3",
+        "name": "calculate brightness",
+        "func": "const START_BLINKING = 1.3;\nresult = 0.0;\ncurrent = 0.0;\nprev = 0.0;\n\nfor (var stock in msg.payload){\n    current += msg.payload[stock].currentValue;\n    prev += msg.payload[stock].prevValue;\n}\n\nresult = (current - prev) / prev * 100;\n\nif (result > START_BLINKING)\n    result = 256;\nelse if (result < - START_BLINKING)\n    result = -256;\nelse{\n    // map 0 - 1 to 0 - 255\n    result *= 255;\n}\n\nmsg.payload = Math.round(result);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 300,
+        "wires": [
+            [
+                "a3965a6d1f028337"
+            ]
+        ]
+    },
+    {
+        "id": "ecab29e24342226f",
+        "type": "html",
+        "z": "674ace61965dd6f3",
+        "name": "QuoteStrip-changeDown",
+        "property": "payload",
+        "outproperty": "change",
+        "tag": "span.QuoteStrip-changeDown>span",
+        "ret": "html",
+        "as": "single",
+        "x": 890,
+        "y": 160,
+        "wires": [
+            [
+                "c85d09b518534e1e"
+            ]
+        ]
+    },
+    {
+        "id": "c85d09b518534e1e",
+        "type": "switch",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "property": "change",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nempty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1070,
+        "y": 180,
+        "wires": [
+            [
+                "1260210f42e1a1a5"
+            ]
+        ]
+    },
+    {
+        "id": "dcb15801c4ba12bd",
+        "type": "html",
+        "z": "674ace61965dd6f3",
+        "name": "QuoteStrip-changeUp",
+        "property": "payload",
+        "outproperty": "change",
+        "tag": "span.QuoteStrip-changeUp>span",
+        "ret": "html",
+        "as": "single",
+        "x": 880,
+        "y": 200,
+        "wires": [
+            [
+                "c85d09b518534e1e"
+            ]
+        ]
+    },
+    {
+        "id": "1260210f42e1a1a5",
+        "type": "html",
+        "z": "674ace61965dd6f3",
+        "name": "",
+        "property": "payload",
+        "outproperty": "price",
+        "tag": "span.QuoteStrip-lastPrice",
+        "ret": "html",
+        "as": "single",
+        "x": 310,
+        "y": 300,
+        "wires": [
+            [
+                "53c198a183756082"
+            ]
+        ]
+    },
+    {
+        "id": "91478dbd.3a542",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "mqtt.joszuijderwijk.nl",
+        "port": "8883",
+        "tls": "",
+        "clientid": "server_berenhuis",
+        "usetls": true,
+        "compatmode": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    }
+]
