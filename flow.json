@@ -209,7 +209,7 @@
         "type": "function",
         "z": "674ace61965dd6f3",
         "name": "calculate brightness",
-        "func": "const START_BLINKING = 1.3;\nresult = 0.0;\ncurrent = 0.0;\nprev = 0.0;\n\nfor (var stock in msg.payload){\n    current += msg.payload[stock].currentValue;\n    prev += msg.payload[stock].prevValue;\n}\n\nresult = (current - prev) / prev * 100;\n\nif (result > START_BLINKING)\n    result = 256;\nelse if (result < - START_BLINKING)\n    result = -256;\nelse{\n    // map 0 - 1 to 0 - 255\n    result *= 255;\n}\n\nmsg.payload = Math.round(result);\nreturn msg;",
+        "func": "const START_BLINKING = 1.3;\nresult = 0.0;\ncurrent = 0.0;\nprev = 0.0;\n\nfor (var stock in msg.payload){\n    current += msg.payload[stock].currentValue;\n    prev += msg.payload[stock].prevValue;\n}\n\nresult = (current - prev) / prev * 100;\n\nif (result > START_BLINKING)\n    result = 256;\nelse if (result < - START_BLINKING)\n    result = -256;\nelse{\n    // map 0 - 1 to 0 - 255\n    result *= 255;\n    result = Math.min(-255, Math.max(result, 255));\n}\n\nmsg.payload = Math.round(result);\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
