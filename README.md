@@ -4,4 +4,4 @@ This repository contains the code for driving an RGB light that gets updated thr
 
 Find more information in my blogpost:
 
-https://joszuijderwijk.nl/stockwatcher
+https://joszuijderwijk.nl/blog/stockwatcher
